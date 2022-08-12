@@ -7,16 +7,17 @@ def tokenization(formatted_text):
     return formatted_text.split()
 
 
-def cleaning(text):
+def cleaning(text, isBody=False):
     # Lower the case
     text = text.lower()
 
-    # Removing unwanted characters
-    text = text.replace('\n', ' ')
-    text = text.replace('File:', ' ')
-    text = re.sub('(http://[^ ]+)', ' ', text)
-    text = re.sub('(https://[^ ]+)', ' ', text)
-    text = re.sub('\{.*?\}|\[.*?\]|\=\=.*?\=\=', ' ', text)
+    # Removing unwanted characters (ONLY for body text)
+    if isBody:
+        text = text.replace('\n', ' ')
+        text = text.replace('File:', ' ')
+        text = re.sub('(http://[^ ]+)', ' ', text)
+        text = re.sub('(https://[^ ]+)', ' ', text)
+        text = re.sub('\{.*?\}|\[.*?\]|\=\=.*?\=\=', ' ', text)
 
     # Removing non-ASCII
     formatted_text = ''
@@ -56,8 +57,8 @@ def stemming(processed_text):
     return stemmed_text
 
 
-def processText(text):
-    text = cleaning(text)
+def processText(text, isBody=False):
+    text = cleaning(text, isBody)
     text = stemming(text)
     return text
 

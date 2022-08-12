@@ -28,3 +28,9 @@ def processInfobox(text):
     infobox_data = ' '.join(text_data)
     processed_infobox = processText(infobox_data)
     return processed_infobox
+
+
+def processBodyText(text):
+    processed_body_text = []
+    processed_body_text = processText(text, True)
+    return processed_body_text
