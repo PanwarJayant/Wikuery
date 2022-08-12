@@ -56,10 +56,12 @@ def stemming(processed_text):
     return stemmed_text
 
 
+def processText(text):
+    text = cleaning(text)
+    text = stemming(text)
+    return text
+
+
 html_tags = re.compile('&amp;|&apos;|&gt;|&lt;|&nbsp;|&quot;')
 stemmer = ps()
 stopwords = set(sw.words('english'))
-text = "https://a is the was am are programming beautifully$#@ goated game yesterday"
-text = cleaning(text)
-text = stemming(text)
-print(text)
