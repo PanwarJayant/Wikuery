@@ -36,7 +36,6 @@ def writeIDmap(id_title_map):
         t += title.strip()
         temp_id_title.append(t)
 
-    os.mkdir("./indexing")
     file = open("./indexing/id_title_map.txt", 'a')
     file.write('\n'.join(temp_id_title))
     file.write('\n')
@@ -51,7 +50,7 @@ def writeIntIndex(num_files, index_map):
         toAppend = word+'-'+posting
         temp_index.append(toAppend)
 
-    file = open("./indexing/index_{num_files}.txt", "w")
+    file = open(f"./indexing/index_{num_files}.txt", "w")
     file.write('\n'.join(temp_index))
     file.close()
     num_files += 1
@@ -107,9 +106,9 @@ def writeFiles(merge_data, final_num_files):
     sorted_data = sorted(merge_data)
     # sorted_data = sorted(merge_data.items(), key=lambda item:item[0])
 
-    enumerated_data = enumerate(sorted_data)
+    # enumerated_data = enumerate(sorted_data)
 
-    for i, (token, postings) in tqdm(enumerated_data):
+    for i, (token, postings) in tqdm(enumerate(sorted_data)):
         for posting in postings.split(';')[:-1]:
             id = posting.split(':')[0]
             fields = posting.split(':')[1]
@@ -130,7 +129,7 @@ def writeFiles(merge_data, final_num_files):
     final_titles, final_body_text, final_categories, final_infoboxes, final_links, final_references = ([
     ] for i in range(6))
 
-    for i, (token, j) in tqdm(enumerated_data):
+    for i, (token, j) in tqdm(enumerate(sorted_data)):
         final_titles, unique_token_info = updateInfo(
             token, title_dict, final_titles, unique_token_info)
         final_body_text, unique_token_info = updateInfo(

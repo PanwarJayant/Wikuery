@@ -38,29 +38,32 @@ def processBodyText(text):
 
 def processCategories(text):
     processed_categories = []
-    text = text.split('\n')
-    start = "[[Category:"
-    end = "]]"
-    start_idx = 0
-    end_idx = len(text)
-    for str in text:
-        if(str.startswith(start)):
-            break
+    try:
+        text = text.split('\n')
+        start = "[[Category:"
+        end = "]]"
+        start_idx = 0
+        end_idx = len(text)
+        for str in text:
+            if(str.startswith(start)):
+                break
+            start_idx += 1
+        text_data = []
+        first_category = text[start_idx].replace(start, ' ')
+        first_category = first_category.replace(end, ' ')
+        text_data.append(first_category)
         start_idx += 1
-    text_data = []
-    first_category = text[start_idx].replace(start, ' ')
-    first_category = first_category.replace(end, ' ')
-    text_data.append(first_category)
-    start_idx += 1
-    for id in range(start_idx, end_idx):
-        if(text[id].endswith(end)):
-            other_category = text[id].replace(start, ' ')
-            other_category = other_category.replace(end, ' ')
-            text_data.append(other_category)
-        else:
-            break
-    category_data = ' '.join(text_data)
-    processed_categories = processText(category_data)
+        for id in range(start_idx, end_idx):
+            if(text[id].endswith(end)):
+                other_category = text[id].replace(start, ' ')
+                other_category = other_category.replace(end, ' ')
+                text_data.append(other_category)
+            else:
+                break
+        category_data = ' '.join(text_data)
+        processed_categories = processText(category_data)
+    except IndexError:
+        pass
     return processed_categories
 
 

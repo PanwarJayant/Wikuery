@@ -125,8 +125,11 @@ num_pages = 0
 index_map = defaultdict(str)
 id_title_map = {}
 
+if not os.path.exists("./indexing/"):
+    os.mkdir("./indexing")
+
 parser = xml.sax.make_parser()
-parser.setFeature(xml.sax.handler, feature_namespaces, False)
+parser.setFeature(xml.sax.handler.feature_namespaces, False)
 xml_handler = XMLHandler()
 parser.setContentHandler(xml_handler)
 output = parser.parse(getInputFile())
