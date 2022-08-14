@@ -52,6 +52,30 @@ def updatePosting(posting, dict, word, char):
     return posting
 
 
+def updateTokenCounts(list=[]):
+    token_count = 0
+
+    if not list:
+        file = open("./indexing/tokens_info_other.txt", "r")
+        token_count += 1
+        file.close()
+
+        file = open(f"./indexing/tokens_info_others_count.txt", "w")
+        file.write(str(token_count))
+        file.close()
+
+    else:
+        for part in tqdm(list):
+            token_count = 0
+            file = open(f"./indexing/tokens_info_{part}.txt", "r")
+            for line in file:
+                token_count += 1
+            file.close()
+            file = open(f"./indexing/tokens_info_{part}_count.txt", "w")
+            file.write(str(token_count))
+            file.close()
+
+
 def createIndex(title, body, category, infobox, link, reference):
     global num_files
     global num_pages
@@ -109,6 +133,45 @@ output = parser.parse(getInputFile())
 
 num_files = writeIntIndex(num_files, index_map)
 writeIDmap(id_title_map)
+
+final_num_files = mergeFiles(num_files)
+
+writeProcessInfo(num_pages, "num_pages")
+num_tokens_final = 0
+file = open("./indexing/tokens_info.txt", "r")
+for line in file:
+    num_tokens_final += 1
+file.close()
+writeProcessInfo(num_tokens_final, "num_tokens")
+
+char_list = []
+num_list = []
+for i in range(97, 123):
+    char_list.append(chr(i))
+for i in range(0, 10):
+    num_list.append(str(i))
+
+file = open(f"./indexing/tokens_info.txt", "r")
+for line in tqdm(file):
+    if (line[0] in char_list) or (line[0] in num_list):
+        subfile = open(f"./indexing/tokens_info_{line[0]}.txt", "a")
+        subfile.write(line.strip())
+        subfile.write('\n')
+        subfile.close()
+
+    else:
+        subfile = open(f"./indexing/tokens_info_others.txt", "a")
+        subfile.write(line.strip())
+        subfile.write('\n')
+file.close()
+
+updateTokenCounts(char_list)
+updateTokenCounts(num_list)
+updateTokenCounts()
+
+os.remove("./indexing/tokens_info.txt")
+print("Total tokens", num_tokens_final)
+print("Total files: ", final_num_files)
 
 end = time.time()
 print("Total indexing time: ", end-start)

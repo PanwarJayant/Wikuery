@@ -1,3 +1,6 @@
+from heapq import merge
+from importlib.metadata import files
+from lib2to3.pgen2 import token
 import sys
 import os
 from tqdm import tqdm
@@ -155,3 +158,66 @@ def writeFiles(merge_data, final_num_files):
 
     final_num_files += 1
     return final_num_files
+
+
+def mergeFiles(num_itermed_files):
+    files_data, line, postings = ({} for i in range(3))
+    is_file_empty = {i: 1 for i in range(num_itermed_files)}
+    tokens = []
+
+    i = 0
+    while i < num_itermed_files:
+        files_data[i] = open(f'./indexing/index_{i}.txt', 'r')
+        line[i] = files_data[i].readline()
+        line[i] = line[i].strip('\n')
+        postings[i] = line[i].split('-')
+        is_file_empty[i] = 0
+        new_token = postings[i][0]
+        if new_token not in tokens:
+            tokens.append(new_token)
+        i += 1
+
+    tokens.sort(reverse=True)
+    num_processed_postings = 0
+    merge_data = defaultdict(str)
+    final_num_files = 0
+
+    while sum(is_file_empty.values()) != num_itermed_files:
+        token = tokens.pop()
+        num_processed_postings += 1
+        if not (num_processed_postings % 30000):
+            final_num_files = writeFiles(merge_data, final_num_files)
+            merge_data = defaultdict(str)
+
+        i = 0
+        while i < num_itermed_files:
+            if is_file_empty[i] == 0:
+                if token == postings[i][0]:
+                    line[i] = files_data[i].readline()
+                    line[i] = line[i].strip('\n')
+                    merge_data[token] += postings[i][1]
+
+                    if len(line[i]):
+                        postings[i] = line[i].split('-')
+                        new_token = postings[i][0]
+
+                        if new_token not in tokens:
+                            tokens.append(new_token)
+                            tokens.sort(reverse=True)
+
+                    else:
+                        is_file_empty[i] = 1
+                        files_data[i].close()
+                        print(f"Removing file {str(i)}")
+                        os.remove(f"./indexing/index_{str(i)}.txt")
+            i += 1
+
+    final_num_files = writeFiles(merge_data, final_num_files)
+    return final_num_files
+
+
+def writeProcessInfo(var, path):
+    full_path = "./indexing/"+path+".txt"
+    file = open(full_path, "w")
+    file.write(str(var))
+    file.close()
