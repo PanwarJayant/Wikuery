@@ -1,34 +1,27 @@
-from asyncio.windows_events import NULL
-from email.policy import default
-from os import link
-from turtle import title
-from unicodedata import category
 import xml.sax
 # import parser
 from handler import *
 from collections import defaultdict
 
 
-def intializeDicts():
-    return defaultdict(int)
-
-
-def updateComponents(component, dict):
+def updateComponents(words_set, component, dict):
     words_set.update(component)
     for part in component:
         dict[part] += 1
+    return words_set, dict
 
 
-def createIndex():
-    return NULL
+def createIndex(title, body, category, infobox, link, reference, num_pages, index_map, id_title_map):
+    words_set = set()
+    title_dict, body_dict, category_dict, infobox_dict, link_dict, reference_dict = initializeDicts(
+        int)
 
-
-words_set = set()
-title_dict = intializeDicts()
-body_dict = intializeDicts()
-category_dict = intializeDicts()
-infobox_dict = intializeDicts()
-link_dict = intializeDicts()
-reference_dict = intializeDicts()
-
-input_file = getInputFile()
+    words_set, title_dict = updateComponents(words_set, title, title_dict)
+    words_set, body_dict = updateComponents(words_set, body, body_dict)
+    words_set, category_dict = updateComponents(
+        words_set, category, category_dict)
+    words_set, infobox_dict = updateComponents(
+        words_set, infobox, infobox_dict)
+    words_set, link_dict = updateComponents(words_set, link, link_dict)
+    words_set, reference_dict = updateComponents(
+        words_set, reference, reference_dict)

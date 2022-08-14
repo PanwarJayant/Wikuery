@@ -2,7 +2,7 @@ import xml.sax
 import textProcessor
 
 
-def xmlContentHandler()
+# def xmlContentHandler()
 
 
 parser = xml.sax.make_parser()
