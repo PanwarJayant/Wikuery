@@ -1,9 +1,40 @@
-from glob import glob
-from operator import index
+import time
 import xml.sax
-# import parser
+from xml.sax.handler import feature_namespaces
+import wikiProcessor
 from handler import *
 from collections import defaultdict
+
+
+class XMLHandler(xml.sax.ContentHandler):
+    def __init__(self):
+        self.tag = ''
+        self.title = ''
+        self.text = ''
+
+    def startElement(self, name, attrs):
+        self.tag = name
+
+    def endElement(self, name):
+        global num_pages
+        global id_title_map
+        if name == "page":
+            print(num_pages)
+            id_title_map[num_pages] = self.title.lower()
+            title = wikiProcessor.processTitle(self.title)
+            infobox, body_text, references, links, categories = wikiProcessor.processBody(
+                self.text)
+            createIndex(title, body_text, categories,
+                        infobox, links, references)
+            self.tag = ""
+            self.title = ""
+            self.text = ""
+
+    def characters(self, content):
+        if self.tag == "title":
+            self.title += content
+        if self.tag == "text":
+            self.text += content
 
 
 def updateComponents(words_set, component, dict):
@@ -63,7 +94,21 @@ def createIndex(title, body, category, infobox, link, reference):
         id_title_map = {}
 
 
+start = time.time()
+
 num_files = 0
 num_pages = 0
 index_map = defaultdict(str)
 id_title_map = {}
+
+parser = xml.sax.make_parser()
+parser.setFeature(xml.sax.handler, feature_namespaces, False)
+xml_handler = XMLHandler()
+parser.setContentHandler(xml_handler)
+output = parser.parse(getInputFile())
+
+num_files = writeIntIndex(num_files, index_map)
+writeIDmap(id_title_map)
+
+end = time.time()
+print("Total indexing time: ", end-start)
