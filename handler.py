@@ -130,4 +130,34 @@ def writeFiles(merge_data, final_num_files):
                                str(len(postings.split(';')[:-1]))])
         unique_token_info[token] = token_info+'-'
 
-    final_titles, final_body_text, final_categories, final_infoboxe
+    final_titles, final_body_text, final_categories, final_infoboxes, final_links, final_references = ([
+    ] for i in range(6))
+
+    for i, (token, j) in tqdm(enumerated_data):
+        final_titles, unique_token_info = updateInfo(
+            token, title_dict, final_titles, unique_token_info)
+        final_body_text, unique_token_info = updateInfo(
+            token, body_dict, final_body_text, unique_token_info)
+        final_categories, unique_token_info = updateInfo(
+            token, category_dict, final_categories, unique_token_info)
+        final_infoboxes, unique_token_info = updateInfo(
+            token, infobox_dict, final_infoboxes, unique_token_info)
+        final_links, unique_token_info = updateInfo(
+            token, link_dict, final_links, unique_token_info)
+        final_references, unique_token_info = updateInfo(
+            token, reference_dict, final_references, unique_token_info)
+
+    file = open("./indexing/tokens_info.txt", "a")
+    file.write('\n'.join(unique_token_info.values()))
+    file.write('\n')
+    file.close()
+
+    writeDiffPosting('title', final_titles, final_num_files)
+    writeDiffPosting('body', final_body_text, final_num_files)
+    writeDiffPosting('category', final_categories, final_num_files)
+    writeDiffPosting('infobox', final_infoboxes, final_num_files)
+    writeDiffPosting('link', final_links, final_num_files)
+    writeDiffPosting('reference', final_references,  final_num_files)
+
+    final_num_files += 1
+    return final_num_files
