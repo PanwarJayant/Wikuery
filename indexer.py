@@ -1,4 +1,3 @@
-from cgitb import text
 import pstats
 import time
 import xml.sax
@@ -133,7 +132,7 @@ num_files = 0
 num_pages = 0
 index_map = defaultdict(str)
 id_title_map = {}
-text_tokens = {}
+text_tokens = set()
 
 output_path = getOutputPath()
 stat_file = getStatFile()
@@ -191,11 +190,11 @@ updateTokenCounts()
 
 os.remove(f"{output_path}/tokens_info.txt")
 print("Total indexing tokens", num_tokens_final)
-print("Total text tokens: ", len(text_tokens.keys()))
+print("Total text tokens: ", len(text_tokens))
 print("Total files: ", final_num_files)
 
 file = open(f"{stat_file}", "w")
-file.write(str(len(text_tokens.keys())))
+file.write(str(len(text_tokens)))
 file.write('\n')
 file.write(str(num_tokens_final))
 file.close()
