@@ -27,9 +27,9 @@ def initializeDicts(type):
 
 def writeIDmap(id_title_map):
     temp_id_title = []
-    # temp_id_title_map = sorted(
-    #     id_title_map.items(), key=lambda item: int(item[0]))
-    temp_id_title_map = sorted(id_title_map.items())
+    temp_id_title_map = sorted(
+        id_title_map.items(), key=lambda item: int(item[0]))
+    # temp_id_title_map = sorted(id_title_map.items())
 
     for id, title in tqdm(temp_id_title_map):
         t = str(id)+'-'
@@ -43,8 +43,8 @@ def writeIDmap(id_title_map):
 
 
 def writeIntIndex(num_files, index_map):
-    temp_index_map = sorted(index_map.items())
-    # temp_index_map = sorted(index_map.items(), key=lambda item: item[0])
+    # temp_index_map = sorted(index_map.items())
+    temp_index_map = sorted(index_map.items(), key=lambda item: item[0])
     temp_index = []
     for word, posting in tqdm(temp_index_map):
         toAppend = word+'-'+posting
@@ -64,8 +64,8 @@ def searchAndGroup(char, dict, fields, token, id):
 
 
 def getDiffPosting(token, posting, final_components):
-    postings = sorted(posting.items())
-    # postings = sorted(posting.items(), key=lambda item: int(item[0]))
+    # postings = sorted(posting.items())
+    postings = sorted(posting.items(), key=lambda item: int(item[0]))
 
     final_posting = token+'-'
 
@@ -78,9 +78,9 @@ def getDiffPosting(token, posting, final_components):
 
 
 def writeDiffPosting(type, final_components, final_num_files):
-    path = "./indexing/" + type + \
-        "_data_" + str(final_num_files) + ".txt"
-    file = open(path, "w")
+    # path = "./indexing/" + type + \
+    #     "_data_" + str(final_num_files) + ".txt"
+    file = open(f"./indexing/{type}_data_{str(final_num_files)}.txt", "w")
     file.write('\n'.join(final_components))
     file.close()
 
@@ -90,9 +90,9 @@ def updateInfo(token, dict, final_components, unique_token_info):
         posting = dict[token]
         final_components = getDiffPosting(token, posting, final_components)
         t_len = len(final_components)
-        unique_token_info[token] += str(t_len)
-
-    unique_token_info[token] += '-'
+        unique_token_info[token] += str(t_len)+'-'
+    else:
+        unique_token_info[token] += '-'
 
     return final_components, unique_token_info
 
@@ -103,8 +103,8 @@ def writeFiles(merge_data, final_num_files):
 
     unique_token_info = {}
 
-    sorted_data = sorted(merge_data)
-    # sorted_data = sorted(merge_data.items(), key=lambda item:item[0])
+    # sorted_data = sorted(merge_data)
+    sorted_data = sorted(merge_data.items(), key=lambda item: item[0])
 
     # enumerated_data = enumerate(sorted_data)
 

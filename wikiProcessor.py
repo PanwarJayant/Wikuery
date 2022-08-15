@@ -23,7 +23,11 @@ def processInfobox(text):
     for ch in range(start_idx, end_idx):
         if(text[ch] == end):
             break
-        text_data.append(text[ch])
+        if start in text[ch]:
+            st = text[ch].replace(start, ' ')
+            text_data.append(st)
+        else:
+            text_data.append(text[ch])
 
     infobox_data = ' '.join(text_data)
     processed_infobox = processText(infobox_data)
@@ -49,14 +53,14 @@ def processCategories(text):
                 break
             start_idx += 1
         text_data = []
-        first_category = text[start_idx].replace(start, ' ')
-        first_category = first_category.replace(end, ' ')
+        first_category = text[start_idx].replace(start, ' ').replace(end, ' ')
+        # first_category = first_category.replace(end, ' ')
         text_data.append(first_category)
         start_idx += 1
         for id in range(start_idx, end_idx):
             if(text[id].endswith(end)):
-                other_category = text[id].replace(start, ' ')
-                other_category = other_category.replace(end, ' ')
+                other_category = text[id].replace(start, ' ').replace(end, ' ')
+                # other_category = other_category.replace(end, ' ')
                 text_data.append(other_category)
             else:
                 break
@@ -72,11 +76,12 @@ def processReferencesOrLinks(text, isReference=False, isLink=False):
     components = ''
     splitter = ""
     if isReference:
-        splitter = "==References"
+        splitter = "==References=="
     if isLink:
         splitter = "==External links=="
     text = text.split(splitter)
     if len(text) <= 1:
+        processed_components = processText(components)
         return processed_components
     text_split = text[1].split("\n")[1:]
     for str in text_split:

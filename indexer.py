@@ -19,7 +19,7 @@ class XMLHandler(xml.sax.ContentHandler):
         global num_pages
         global id_title_map
         if name == "page":
-            print(num_pages)
+            print("Page no: ", num_pages)
             id_title_map[num_pages] = self.title.lower()
             title = wikiProcessor.processTitle(self.title)
             infobox, body_text, references, links, categories = wikiProcessor.processBody(
@@ -48,7 +48,6 @@ def updatePosting(posting, dict, word, char):
     if dict[word]:
         posting += char
         posting += str(dict[word])
-    posting += ';'
     return posting
 
 
@@ -56,9 +55,12 @@ def updateTokenCounts(list=[]):
     token_count = 0
 
     if not list:
-        file = open("./indexing/tokens_info_other.txt", "r")
-        token_count += 1
-        file.close()
+        try:
+            file = open("./indexing/tokens_info_others.txt", "r")
+            token_count += 1
+            file.close()
+        except FileNotFoundError:
+            pass
 
         file = open(f"./indexing/tokens_info_others_count.txt", "w")
         file.write(str(token_count))
@@ -106,6 +108,7 @@ def createIndex(title, body, category, infobox, link, reference):
             posting = updatePosting(posting, infobox_dict, word, 'i')
             posting = updatePosting(posting, link_dict, word, 'l')
             posting = updatePosting(posting, reference_dict, word, 'r')
+            posting += ';'
 
             index_map[word] += posting
 
@@ -166,6 +169,7 @@ for line in tqdm(file):
         subfile = open(f"./indexing/tokens_info_others.txt", "a")
         subfile.write(line.strip())
         subfile.write('\n')
+        subfile.close()
 file.close()
 
 updateTokenCounts(char_list)
