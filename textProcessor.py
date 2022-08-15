@@ -1,10 +1,40 @@
+from os import remove
 from nltk.corpus import stopwords as sw
-from nltk.stem import PorterStemmer as ps
+import Stemmer
 import re
 
 
 def tokenization(formatted_text):
     return formatted_text.split()
+
+
+def cleanBodyText(text):
+    text = text.replace('\n', ' ')
+    text = text.replace('File:', ' ')
+    text = re.sub('(http://[^ ]+)', ' ', text)
+    text = re.sub('(https://[^ ]+)', ' ', text)
+    text = re.sub('\{.*?\}|\[.*?\]|\=\=.*?\=\=', ' ', text)
+    return text
+
+
+def removeStopwords(formatted_text):
+    processed_text = []
+    for word in formatted_text:
+        if word in stopwords:
+            continue
+        else:
+            processed_text.append(word)
+    return processed_text
+
+
+def removeNonASCII(text):
+    formatted_text = ''
+    for char in text:
+        if(ord(char) < 128):
+            formatted_text += char
+        else:
+            formatted_text += ' '
+    return formatted_text
 
 
 def cleaning(text, isBody=False):
@@ -13,19 +43,10 @@ def cleaning(text, isBody=False):
 
     # Removing unwanted characters (ONLY for body text)
     if isBody:
-        text = text.replace('\n', ' ')
-        text = text.replace('File:', ' ')
-        text = re.sub('(http://[^ ]+)', ' ', text)
-        text = re.sub('(https://[^ ]+)', ' ', text)
-        text = re.sub('\{.*?\}|\[.*?\]|\=\=.*?\=\=', ' ', text)
+        text = cleanBodyText(text)
 
     # Removing non-ASCII
-    formatted_text = ''
-    for char in text:
-        if(ord(char) < 128):
-            formatted_text += char
-        else:
-            formatted_text += ' '
+    formatted_text = removeNonASCII(text)
 
     # Removing HTML Tags
     formatted_text = re.sub(html_tags, ' ', formatted_text)
@@ -39,20 +60,13 @@ def cleaning(text, isBody=False):
     formatted_text = tokenization(formatted_text)
 
     # Remove stopWords
-    processed_text = []
-    for word in formatted_text:
-        if word in stopwords:
-            continue
-        else:
-            processed_text.append(word)
+    processed_text = removeStopwords(formatted_text)
 
     return processed_text
 
 
 def stemming(processed_text):
-    stemmed_text = []
-    for word in processed_text:
-        stemmed_text.append(stemmer.stem(word))
+    stemmed_text = stemmer.stemWords(processed_text)
 
     return stemmed_text
 
@@ -64,5 +78,5 @@ def processText(text, isBody=False):
 
 
 html_tags = re.compile('&amp;|&apos;|&gt;|&lt;|&nbsp;|&quot;')
-stemmer = ps()
+stemmer = Stemmer.Stemmer('english')
 stopwords = set(sw.words('english'))

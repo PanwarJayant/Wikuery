@@ -1,9 +1,11 @@
+import pstats
 import time
 import xml.sax
 from xml.sax.handler import feature_namespaces
 import wikiProcessor
 from handler import *
 from collections import defaultdict
+import cProfile
 
 
 class XMLHandler(xml.sax.ContentHandler):
@@ -135,7 +137,13 @@ parser = xml.sax.make_parser()
 parser.setFeature(xml.sax.handler.feature_namespaces, False)
 xml_handler = XMLHandler()
 parser.setContentHandler(xml_handler)
+
+# COMMENTED CODE USED FOR PROFILING AND CHECKING TIME
+# with cProfile.Profile() as pr:
 output = parser.parse(getInputFile())
+# stats = pstats.Stats(pr)
+# stats.sort_stats(pstats.SortKey.TIME)
+# stats.dump_stats(filename="stats.prof")
 
 num_files = writeIntIndex(num_files, index_map)
 writeIDmap(id_title_map)
