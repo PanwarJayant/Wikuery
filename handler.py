@@ -26,11 +26,11 @@ def initializeDicts(type):
 
 
 def writeIDmap(id_title_map):
-    temp_id_title = []
     temp_id_title_map = sorted(
         id_title_map.items(), key=lambda item: int(item[0]))
     # temp_id_title_map = sorted(id_title_map.items())
 
+    temp_id_title = []
     for id, title in tqdm(temp_id_title_map):
         t = str(id)+'-'
         t += title.strip()
@@ -43,9 +43,9 @@ def writeIDmap(id_title_map):
 
 
 def writeIntIndex(num_files, index_map):
+    temp_index = []
     # temp_index_map = sorted(index_map.items())
     temp_index_map = sorted(index_map.items(), key=lambda item: item[0])
-    temp_index = []
     for word, posting in tqdm(temp_index_map):
         toAppend = word+'-'+posting
         temp_index.append(toAppend)
@@ -63,14 +63,15 @@ def searchAndGroup(char, dict, fields, token, id):
     return dict
 
 
-def getDiffPosting(token, posting, final_components):
+def getDiffPosting(token, posting, final_components, isDiff=True):
     # postings = sorted(posting.items())
     postings = sorted(posting.items(), key=lambda item: int(item[0]))
 
-    final_posting = token+'-'
+    if isDiff:
+        final_posting = token+'-'
 
-    for id, freq in postings:
-        final_posting += str(id)+":"+freq+';'
+        for id, freq in postings:
+            final_posting += str(id)+":"+freq+';'
 
     final_components.append(final_posting.rstrip(';'))
 
@@ -89,10 +90,9 @@ def updateInfo(token, dict, final_components, unique_token_info):
     if token in dict.keys():
         posting = dict[token]
         final_components = getDiffPosting(token, posting, final_components)
-        t_len = len(final_components)
-        unique_token_info[token] += str(t_len)+'-'
-    else:
-        unique_token_info[token] += '-'
+        unique_token_info[token] += str(len(final_components))
+
+    unique_token_info[token] += '-'
 
     return final_components, unique_token_info
 
@@ -109,7 +109,8 @@ def writeFiles(merge_data, final_num_files):
     # enumerated_data = enumerate(sorted_data)
 
     for i, (token, postings) in tqdm(enumerate(sorted_data)):
-        for posting in postings.split(';')[:-1]:
+        splits = postings.split(';')[:-1]
+        for posting in splits:
             id = posting.split(':')[0]
             fields = posting.split(':')[1]
 
@@ -123,7 +124,7 @@ def writeFiles(merge_data, final_num_files):
                 'r', reference_dict, fields, token, id)
 
         token_info = '-'.join([token, str(final_num_files),
-                               str(len(postings.split(';')[:-1]))])
+                               str(len(splits))])
         unique_token_info[token] = token_info+'-'
 
     final_titles, final_body_text, final_categories, final_infoboxes, final_links, final_references = ([
@@ -164,17 +165,15 @@ def mergeFiles(num_itermed_files):
     is_file_empty = {i: 1 for i in range(num_itermed_files)}
     tokens = []
 
-    i = 0
-    while i < num_itermed_files:
+    for i in range(num_itermed_files):
         files_data[i] = open(f'./indexing/index_{i}.txt', 'r')
-        line[i] = files_data[i].readline()
-        line[i] = line[i].strip('\n')
-        postings[i] = line[i].split('-')
+        stripped = files_data[i].readline().strip('\n')
+        line[i] = stripped
+        postings[i] = stripped.split('-')
         is_file_empty[i] = 0
         new_token = postings[i][0]
-        if new_token not in tokens:
+        if postings[i][0] not in tokens:
             tokens.append(new_token)
-        i += 1
 
     tokens.sort(reverse=True)
     num_processed_postings = 0
@@ -190,25 +189,26 @@ def mergeFiles(num_itermed_files):
 
         i = 0
         while i < num_itermed_files:
-            if is_file_empty[i] == 0:
+            if not is_file_empty[i]:
                 if token == postings[i][0]:
                     line[i] = files_data[i].readline()
                     line[i] = line[i].strip('\n')
                     merge_data[token] += postings[i][1]
 
-                    if len(line[i]):
+                    if len(line[i]) > 0:
                         postings[i] = line[i].split('-')
                         new_token = postings[i][0]
 
-                        if new_token not in tokens:
+                        if postings[i][0] not in tokens:
                             tokens.append(new_token)
                             tokens.sort(reverse=True)
 
-                    else:
+                    elif len(line[i]) == 0:
                         is_file_empty[i] = 1
                         files_data[i].close()
-                        print(f"Removing file {str(i)}")
-                        os.remove(f"./indexing/index_{str(i)}.txt")
+                        if os.path.exists(f"./indexing/index_{str(i)}.txt"):
+                            print(f"Removing file {str(i)}")
+                            os.remove(f"./indexing/index_{str(i)}.txt")
             i += 1
 
     final_num_files = writeFiles(merge_data, final_num_files)
