@@ -83,12 +83,14 @@ def processReferencesOrLinks(text, isReference=False, isLink=False):
     if len(text) <= 1:
         processed_components = processText(components)
         return processed_components
-    text_split = text[1].split("\n")[1:]
-    for str in text_split:
-        if str == '':
+    text_split = text[1].split("\n")
+    text_split = text_split[1:]
+    end = len(text_split)
+    for str in range(end):
+        if text_split[str] == '':
             break
-        if str[0] == '*':
-            str_split = str.split(' ')
+        if text_split[str][0] == '*':
+            str_split = text_split[str].split(' ')
             component = []
             for wrd in str_split:
                 if "http" not in wrd:
