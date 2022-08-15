@@ -1,5 +1,6 @@
 from heapq import merge
 from importlib.metadata import files
+from inspect import getouterframes
 from lib2to3.pgen2 import token
 import sys
 import os
@@ -13,6 +14,20 @@ def getInputFile():
         print("ERROR: Please enter path to XML dump!")
         exit()
     return sys.argv[1]
+
+
+def getOutputPath():
+    if(len(sys.argv) <= 2):
+        print("ERROR: Please enter path for index files")
+        exit()
+    return sys.argv[2]
+
+
+def getStatFile():
+    if(len(sys.argv) <= 3):
+        print("ERROR: Please enter invertedindex_stat.txt file path")
+        exit()
+    return sys.argv[3]
 
 
 def initializeDicts(type):
@@ -36,13 +51,14 @@ def writeIDmap(id_title_map):
         t += title.strip()
         temp_id_title.append(t)
 
-    file = open("./indexing/id_title_map.txt", 'a')
+    output_path = getOutputPath()
+    file = open(f"{output_path}/id_title_map.txt", 'a')
     file.write('\n'.join(temp_id_title))
     file.write('\n')
     file.close()
 
 
-def writeIntIndex(num_files, index_map):
+def writeIntIndex(num_files, index_map, output_path):
     temp_index = []
     # temp_index_map = sorted(index_map.items())
     temp_index_map = sorted(index_map.items(), key=lambda item: item[0])
@@ -50,7 +66,7 @@ def writeIntIndex(num_files, index_map):
         toAppend = word+'-'+posting
         temp_index.append(toAppend)
 
-    file = open(f"./indexing/index_{num_files}.txt", "w")
+    file = open(f"{output_path}/index_{num_files}.txt", "w")
     file.write('\n'.join(temp_index))
     file.close()
     num_files += 1
@@ -81,7 +97,8 @@ def getDiffPosting(token, posting, final_components, isDiff=True):
 def writeDiffPosting(type, final_components, final_num_files):
     # path = "./indexing/" + type + \
     #     "_data_" + str(final_num_files) + ".txt"
-    file = open(f"./indexing/{type}_data_{str(final_num_files)}.txt", "w")
+    output_path = getOutputPath()
+    file = open(f"{output_path}/{type}_data_{str(final_num_files)}.txt", "w")
     file.write('\n'.join(final_components))
     file.close()
 
@@ -144,7 +161,9 @@ def writeFiles(merge_data, final_num_files):
         final_references, unique_token_info = updateInfo(
             token, reference_dict, final_references, unique_token_info)
 
-    file = open("./indexing/tokens_info.txt", "a")
+    output_path = getOutputPath()
+
+    file = open(f"{output_path}/tokens_info.txt", "a")
     file.write('\n'.join(unique_token_info.values()))
     file.write('\n')
     file.close()
@@ -165,8 +184,10 @@ def mergeFiles(num_itermed_files):
     is_file_empty = {i: 1 for i in range(num_itermed_files)}
     tokens = []
 
+    output_path = getOutputPath()
+
     for i in range(num_itermed_files):
-        files_data[i] = open(f'./indexing/index_{i}.txt', 'r')
+        files_data[i] = open(f'{output_path}/index_{i}.txt', 'r')
         stripped = files_data[i].readline().strip('\n')
         line[i] = stripped
         postings[i] = stripped.split('-')
@@ -206,9 +227,9 @@ def mergeFiles(num_itermed_files):
                     elif len(line[i]) == 0:
                         is_file_empty[i] = 1
                         files_data[i].close()
-                        if os.path.exists(f"./indexing/index_{str(i)}.txt"):
+                        if os.path.exists(f"{output_path}/index_{str(i)}.txt"):
                             print(f"Removing file {str(i)}")
-                            os.remove(f"./indexing/index_{str(i)}.txt")
+                            os.remove(f"{output_path}/index_{str(i)}.txt")
             i += 1
 
     final_num_files = writeFiles(merge_data, final_num_files)
@@ -216,7 +237,8 @@ def mergeFiles(num_itermed_files):
 
 
 def writeProcessInfo(var, path):
-    full_path = "./indexing/"+path+".txt"
+    output_path = getOutputPath()
+    full_path = output_path+"/"+path+".txt"
     file = open(full_path, "w")
     file.write(str(var))
     file.close()

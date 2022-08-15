@@ -55,27 +55,28 @@ def updatePosting(posting, dict, word, char):
 
 def updateTokenCounts(list=[]):
     token_count = 0
+    global output_path
 
     if not list:
         try:
-            file = open("./indexing/tokens_info_others.txt", "r")
+            file = open(f"{output_path}/tokens_info_others.txt", "r")
             token_count += 1
             file.close()
         except FileNotFoundError:
             pass
 
-        file = open(f"./indexing/tokens_info_others_count.txt", "w")
+        file = open(f"{output_path}/tokens_info_others_count.txt", "w")
         file.write(str(token_count))
         file.close()
 
     else:
         for part in tqdm(list):
             token_count = 0
-            file = open(f"./indexing/tokens_info_{part}.txt", "r")
+            file = open(f"{output_path}/tokens_info_{part}.txt", "r")
             for line in file:
                 token_count += 1
             file.close()
-            file = open(f"./indexing/tokens_info_{part}_count.txt", "w")
+            file = open(f"{output_path}/tokens_info_{part}_count.txt", "w")
             file.write(str(token_count))
             file.close()
 
@@ -85,6 +86,7 @@ def createIndex(title, body, category, infobox, link, reference):
     global num_pages
     global index_map
     global id_title_map
+    global output_path
     words_set = set()
     title_dict, body_dict, category_dict, infobox_dict, link_dict, reference_dict = initializeDicts(
         int)
@@ -117,7 +119,7 @@ def createIndex(title, body, category, infobox, link, reference):
     num_pages += 1
 
     if not(num_pages % 35000):
-        num_files = writeIntIndex(num_files, index_map)
+        num_files = writeIntIndex(num_files, index_map, output_path)
         writeIDmap(id_title_map)
         index_map = defaultdict(str)
         id_title_map = {}
@@ -130,8 +132,8 @@ num_pages = 0
 index_map = defaultdict(str)
 id_title_map = {}
 
-if not os.path.exists("./indexing/"):
-    os.mkdir("./indexing")
+output_path = getOutputPath()
+stat_file = getStatFile()
 
 parser = xml.sax.make_parser()
 parser.setFeature(xml.sax.handler.feature_namespaces, False)
@@ -145,14 +147,14 @@ output = parser.parse(getInputFile())
 # stats.sort_stats(pstats.SortKey.TIME)
 # stats.dump_stats(filename="stats.prof")
 
-num_files = writeIntIndex(num_files, index_map)
+num_files = writeIntIndex(num_files, index_map, output_path)
 writeIDmap(id_title_map)
 
 final_num_files = mergeFiles(num_files)
 
 writeProcessInfo(num_pages, "num_pages")
 num_tokens_final = 0
-file = open("./indexing/tokens_info.txt", "r")
+file = open(f"{output_path}/tokens_info.txt", "r")
 for line in file:
     num_tokens_final += 1
 file.close()
@@ -165,16 +167,16 @@ for i in range(97, 123):
 for i in range(0, 10):
     num_list.append(str(i))
 
-file = open(f"./indexing/tokens_info.txt", "r")
+file = open(f"{output_path}/tokens_info.txt", "r")
 for line in tqdm(file):
     if (line[0] in char_list) or (line[0] in num_list):
-        subfile = open(f"./indexing/tokens_info_{line[0]}.txt", "a")
+        subfile = open(f"{output_path}/tokens_info_{line[0]}.txt", "a")
         subfile.write(line.strip())
         subfile.write('\n')
         subfile.close()
 
     else:
-        subfile = open(f"./indexing/tokens_info_others.txt", "a")
+        subfile = open(f"{output_path}/tokens_info_others.txt", "a")
         subfile.write(line.strip())
         subfile.write('\n')
         subfile.close()
@@ -184,7 +186,7 @@ updateTokenCounts(char_list)
 updateTokenCounts(num_list)
 updateTokenCounts()
 
-os.remove("./indexing/tokens_info.txt")
+os.remove(f"{output_path}/tokens_info.txt")
 print("Total tokens", num_tokens_final)
 print("Total files: ", final_num_files)
 
