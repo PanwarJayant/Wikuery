@@ -1,3 +1,4 @@
+from cgitb import text
 import pstats
 import time
 import xml.sax
@@ -26,12 +27,13 @@ class XMLHandler(xml.sax.ContentHandler):
     def endElement(self, name):
         global num_pages
         global id_title_map
+        global text_tokens
         if name == "page":
             print("Page no: ", num_pages)
             id_title_map[num_pages] = self.title.lower()
             title = wikiProcessor.processTitle(self.title)
-            infobox, body_text, references, links, categories = wikiProcessor.processBody(
-                self.text)
+            infobox, body_text, references, links, categories, text_tokens = wikiProcessor.processBody(
+                self.text, text_tokens)
             createIndex(title, body_text, categories,
                         infobox, links, references)
             self.tag = ""
@@ -131,6 +133,7 @@ num_files = 0
 num_pages = 0
 index_map = defaultdict(str)
 id_title_map = {}
+text_tokens = {}
 
 output_path = getOutputPath()
 stat_file = getStatFile()
@@ -187,8 +190,15 @@ updateTokenCounts(num_list)
 updateTokenCounts()
 
 os.remove(f"{output_path}/tokens_info.txt")
-print("Total tokens", num_tokens_final)
+print("Total indexing tokens", num_tokens_final)
+print("Total text tokens: ", len(text_tokens.keys()))
 print("Total files: ", final_num_files)
+
+file = open(f"{stat_file}", "w")
+file.write(str(len(text_tokens.keys())))
+file.write('\n')
+file.write(str(num_tokens_final))
+file.close()
 
 end = time.time()
 print("Total indexing time: ", end-start)

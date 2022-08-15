@@ -4,6 +4,17 @@ import Stemmer
 import re
 
 
+def countTextTokens(text, text_tokens):
+    text = text.lower()
+    tokens = text.split()
+    for token in tokens:
+        if token in text_tokens:
+            text_tokens[token] += 1
+        else:
+            text_tokens[token] = 1
+    return text_tokens
+
+
 def tokenization(formatted_text):
     return formatted_text.split()
 

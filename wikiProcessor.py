@@ -1,4 +1,4 @@
-from textProcessor import processText
+from textProcessor import countTextTokens, processText
 
 
 def processTitle(title):
@@ -102,10 +102,11 @@ def processReferencesOrLinks(text, isReference=False, isLink=False):
     return processed_components
 
 
-def processBody(text):
+def processBody(text, text_tokens):
     infobox = processInfobox(text)
     body_text = processBodyText(text)
     references = processReferencesOrLinks(text, isReference=True)
     links = processReferencesOrLinks(text, isLink=True)
     categories = processCategories(text)
-    return infobox, body_text, references, links, categories
+    text_tokens = countTextTokens(text, text_tokens)
+    return infobox, body_text, references, links, categories, text_tokens
