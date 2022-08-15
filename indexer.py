@@ -17,6 +17,12 @@ class XMLHandler(xml.sax.ContentHandler):
     def startElement(self, name, attrs):
         self.tag = name
 
+    def characters(self, content):
+        if self.tag == "title":
+            self.title += content
+        elif self.tag == "text":
+            self.text += content
+
     def endElement(self, name):
         global num_pages
         global id_title_map
@@ -31,12 +37,6 @@ class XMLHandler(xml.sax.ContentHandler):
             self.tag = ""
             self.title = ""
             self.text = ""
-
-    def characters(self, content):
-        if self.tag == "title":
-            self.title += content
-        if self.tag == "text":
-            self.text += content
 
 
 def updateComponents(words_set, component, dict):
